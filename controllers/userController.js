@@ -63,6 +63,16 @@ const emailVerification = async (user)=>{
     });
 }
 
+const createToken = (userId)=>{
+    return jwt.sign(
+        { userId: userId },
+        process.env.TOKENKEY,
+        {
+            expiresIn: "24h",
+        }
+    );
+}
+
 export const activateUser = (hash)=>{
     verificationHash.find({hash}).
         then(foundHash=>{
@@ -72,13 +82,7 @@ export const activateUser = (hash)=>{
             else{
                 userModel.findByIdAndUpdate(foundHash.userId, {active: true}).
                     then(foundUser=>{
-                        return jwt.sign(
-                            { userId: foundUser._id },
-                            process.env.TOKENKEY,
-                            {
-                                expiresIn: "24h",
-                            }
-                        );
+                        return createToken(foundUser._id);
                 }).catch(error=>{
                     throw new Error('failed to activate user' + error);
                 });
@@ -86,4 +90,20 @@ export const activateUser = (hash)=>{
     }).catch(error=>{
         throw new Error('failed to search for hash' + error);
     });
+}
+
+export const validateUser = (user)=>{
+    userModel.find({email: user.email}).
+        then(foundUser=>{
+            if(!foundUser){
+                throw new Error('invalid user name or password');
+            }
+            bcrypt.compare(user.password, foundUser.password).
+                then(result=>{
+                    if(!result){
+                        throw new Error('invalid user name or password');
+                    }
+                return createToken(foundUser._id);
+            }).catch(error=> throw new Error(error));
+    }).catch(error=> throw new Error(error));
 }
