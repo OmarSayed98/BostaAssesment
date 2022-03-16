@@ -6,5 +6,5 @@ router.get("/logout", authorization, (req, res) => {
     return res
         .clearCookie("jwt")
         .status(200)
-        .json({ message: "user logged out" });
+        .json({message: "user logged out"});
 });

@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const userSignOutRouter = require('../routes/userSignOut');
 const userLogInRouter = require('../routes/userLogIn');
 
-module.exports = (app)=>{
+module.exports = (app) => {
     app.use(express.json());
     app.use(cookieParser());
     app.use('/', indexRouter);

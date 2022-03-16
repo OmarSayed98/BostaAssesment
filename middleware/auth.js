@@ -1,15 +1,15 @@
 const jwt = require('jsonwebtoken');
 
-export const authorization = (req, res, next)=>{
+export const authorization = (req, res, next) => {
     const token = req.cookies.jwt;
-    if(!token){
+    if (!token) {
         return res.status(403).json({message: "not authorized"});
     }
-    try{
+    try {
         const tokenPayload = jwt.verify(token, process.env.TOKENKEY);
         req.userId = tokenPayload.userId;
         return next();
-    }catch{
+    } catch {
         return res.status(403).json({message: "not authorized"});
     }
 }

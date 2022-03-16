@@ -5,7 +5,7 @@ const app = express();
 const db = require('./db');
 
 app.use(logger('dev'));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 require("./startup/routes")(app);
 app.listen(3000);
 module.exports = app;
