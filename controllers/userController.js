@@ -75,6 +75,7 @@ export const activateUser = (hash) => {
             throw new Error('invalid Verification URL');
         } else {
             userModel.findByIdAndUpdate(foundHash.userId, {active: true}).then(foundUser => {
+                deleteVerificationHash(foundHash.userId);
                 return createToken(foundUser._id);
             }).catch(error => {
                 throw new Error('failed to activate user' + error);
@@ -96,5 +97,11 @@ export const validateUser = (user) => {
             }
             return createToken(foundUser._id);
         }).catch(error => throw new Error(error));
+    }).catch(error => throw new Error(error));
+}
+
+const deleteVerificationHash = (userId) => {
+    verificationHash.findOneAndDelete({userId}).then(hash => {
+        console.log('verification hash deleted' + hash);
     }).catch(error => throw new Error(error));
 }
