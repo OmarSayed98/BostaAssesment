@@ -6,7 +6,7 @@ const nodemailer = require("nodemailer");
 const verificationHash = require('../models/verificationHash');
 const jwt = require('jsonwebtoken');
 
-export const saveUser = (user) => {
+exports.saveUser = (user) => {
     userModel.find({email: user.email}).then(foundUser => {
         if (!foundUser) {
             bcrypt.hash(user.password, saltRounds, (err, hash) => {
@@ -15,8 +15,12 @@ export const saveUser = (user) => {
                 }
                 user.password = hash;
                 user.save().then(() => {
-                    emailVerification(foundUser.email).catch(error => throw new Error('Failed to send email verification \n' + error));
-                }).catch(error => throw new Error(error));
+                    emailVerification(foundUser.email).catch(error =>{
+                        throw new Error('Failed to send email verification \n' + error);
+                    });
+                }).catch(error => {
+                    throw new Error(error);
+                });
             });
         } else {
             if (foundUser.active === 1) {
@@ -25,7 +29,9 @@ export const saveUser = (user) => {
                 throw new Error('user account not activated please check your email');
             }
         }
-    }).catch(error => throw new Error(error));
+    }).catch(error => {
+        throw new Error(error);
+    });
 }
 
 const emailVerification = async (user) => {
@@ -69,7 +75,7 @@ const createToken = (userId) => {
     );
 }
 
-export const activateUser = (hash) => {
+exports.activateUser = (hash) => {
     verificationHash.find({hash}).then(foundHash => {
         if (!foundHash) {
             throw new Error('invalid Verification URL');
@@ -86,7 +92,7 @@ export const activateUser = (hash) => {
     });
 }
 
-export const validateUser = (user) => {
+exports.validateUser = (user) => {
     userModel.find({email: user.email}).then(foundUser => {
         if (!foundUser) {
             throw new Error('invalid user name or password');
@@ -96,12 +102,18 @@ export const validateUser = (user) => {
                 throw new Error('invalid user name or password');
             }
             return createToken(foundUser._id);
-        }).catch(error => throw new Error(error));
-    }).catch(error => throw new Error(error));
+        }).catch(error => {
+            throw new Error(error);
+        });
+    }).catch(error => {
+        throw new Error(error);
+    });
 }
 
 const deleteVerificationHash = (userId) => {
     verificationHash.findOneAndDelete({userId}).then(hash => {
         console.log('verification hash deleted' + hash);
-    }).catch(error => throw new Error(error));
+    }).catch(error => {
+        throw new Error(error);
+    });
 }

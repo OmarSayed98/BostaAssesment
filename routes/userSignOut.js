@@ -8,3 +8,5 @@ router.get("/logout", authorization, (req, res) => {
         .status(200)
         .json({message: "user logged out"});
 });
+
+module.exports = router;

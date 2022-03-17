@@ -19,3 +19,5 @@ router.get('/signup:hash', (req, res) => {
         res.status(403).json({message: error});
     })
 });
+
+module.exports = router;
