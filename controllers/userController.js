@@ -91,7 +91,11 @@ exports.activateUser = (hash) => {
                 if(!foundUser){
                     throw new Error('cannot find user');
                 }
-                deleteVerificationHash(foundHash.userId);
+                deleteVerificationHash(foundHash.userId).then(()=>{
+                    console.log('verification hash deleted ');
+                }).catch(error=>{
+                    throw new Error(error);
+                })
                 console.log(foundUser);
                 return createToken(foundUser._id);
             }).catch(error => {
@@ -104,25 +108,27 @@ exports.activateUser = (hash) => {
 }
 
 exports.validateUser = (user) => {
-    userModel.find({email: user.email}).then(foundUser => {
-        if (!foundUser) {
-            throw new Error('invalid user name or password');
-        }
-        bcrypt.compare(user.password, foundUser.password).then(result => {
-            if (!result) {
-                throw new Error('invalid user name or password');
+    return new Promise((resolve, reject)=>{
+        userModel.findOne({email: user.email}).then(foundUser => {
+            if (!foundUser) {
+                reject('invalid user name or password');
             }
-            return createToken(foundUser._id);
+            bcrypt.compare(user.password, foundUser.password).then(result => {
+                if (!result) {
+                    reject('invalid user name or password');
+                }
+                resolve(createToken(foundUser._id));
+            }).catch(error => {
+                reject(error);
+            });
         }).catch(error => {
-            throw new Error(error);
+            reject(error);
         });
-    }).catch(error => {
-        throw new Error(error);
     });
 }
 
 const deleteVerificationHash = (userId) => {
-    verificationHash.findOneAndDelete({userId}).then(hash => {
+    return verificationHash.findOneAndDelete({userId}).then(hash => {
         console.log('verification hash deleted' + hash);
     }).catch(error => {
         throw new Error(error);
