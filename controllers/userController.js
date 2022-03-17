@@ -5,28 +5,34 @@ const crypto = require('crypto');
 const nodemailer = require("nodemailer");
 const verificationHash = require('../models/verificationHash');
 const jwt = require('jsonwebtoken');
-
+const mongoose = require('mongoose');
 exports.saveUser = (user) => {
     userModel.find({email: user.email}).then(foundUser => {
-        if (!foundUser) {
+        if (!foundUser.length) {
             bcrypt.hash(user.password, saltRounds, (err, hash) => {
                 if (err) {
-                    throw new Error("Failed to Hash Password");
+                    throw new Error(error);
                 }
                 user.password = hash;
-                user.save().then(() => {
-                    emailVerification(foundUser.email).catch(error =>{
-                        throw new Error('Failed to send email verification \n' + error);
+                const savedUser = new userModel({
+                    name: user.name,
+                    password: user.password,
+                    email: user.email
+                });
+                savedUser.save().then(() => {
+                    emailVerification(savedUser).catch(error => {
+                        throw new Error(error);
                     });
                 }).catch(error => {
                     throw new Error(error);
                 });
             });
         } else {
+            console.log(foundUser.name);
             if (foundUser.active === 1) {
-                throw new Error('email already registered');
+                throw new Error(error);
             } else {
-                throw new Error('user account not activated please check your email');
+                throw new Error(error);
             }
         }
     }).catch(error => {
@@ -36,33 +42,33 @@ exports.saveUser = (user) => {
 
 const emailVerification = async (user) => {
     const randomBytes = crypto.randomBytes(32).toString('hex');
-    const verificationUrl = 'localhost:3000/signup?hash=' + randomBytes;
+    const verificationUrl = 'http://localhost:3000/signup?hash=' + randomBytes;
 
     const userVerificationHash = new verificationHash({
-        userId: user._id,
+        userEmail: user.email,
         hash: randomBytes
     });
     await userVerificationHash.save();
 
-    let testAccount = await nodemailer.createTestAccount();
 
     let transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
+        service: 'gmail',
+        host: "smtp.gmail.com",
         port: 587,
         secure: false,
         auth: {
-            user: testAccount.user,
-            pass: testAccount.pass,
+            user: process.env.VERIFICATION_EMAIL,
+            pass: process.env.VERIFICATION_EMAIL_PASS,
         },
     });
-
-    await transporter.sendMail({
-        from: 'Bosta Backend Assessment', // sender address
+    let email = await transporter.sendMail({
+        from: 'Bosta Assessment', // sender address
         to: user.email, // list of receivers
         subject: "Bosta Assessment account verification", // Subject line
-        text: "Thank You for taking time and creating account at Bosta Backend Assessment please visit the url sent below for activating your accoutn \n" +
+        text: "Thank You for taking time and creating account at Bosta Backend Assessment please visit the url sent below for activating your accout \n" +
             verificationUrl
     });
+    console.log(email.messageId);
 }
 
 const createToken = (userId) => {
@@ -76,12 +82,17 @@ const createToken = (userId) => {
 }
 
 exports.activateUser = (hash) => {
-    verificationHash.find({hash}).then(foundHash => {
+    return verificationHash.findOne({hash}).then(foundHash => {
         if (!foundHash) {
             throw new Error('invalid Verification URL');
         } else {
-            userModel.findByIdAndUpdate(foundHash.userId, {active: true}).then(foundUser => {
+            userModel.findOneAndUpdate({email: foundHash.userEmail}, {active: true}).then(foundUser => {
+                console.log(foundHash)
+                if(!foundUser){
+                    throw new Error('cannot find user');
+                }
                 deleteVerificationHash(foundHash.userId);
+                console.log(foundUser);
                 return createToken(foundUser._id);
             }).catch(error => {
                 throw new Error('failed to activate user' + error);

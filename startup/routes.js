@@ -8,8 +8,8 @@ const userLogInRouter = require('../routes/userLogIn');
 module.exports = (app) => {
     app.use(express.json());
     app.use(cookieParser());
-    app.use('/', indexRouter);
     app.use('/signup', userRegistrationRouter);
+    app.use('/', indexRouter);
     app.use('/logout', userSignOutRouter);
     app.use('/login', userLogInRouter);
 };
