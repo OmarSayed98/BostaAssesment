@@ -3,12 +3,12 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 
 router.post('/', (req, res) => {
-    try{
-        userController.saveUser(req.body);
+    userController.saveUser(req.body).then(message => {
+        console.log(message);
         res.status(200).json(req.body);
-    }catch(error){
+    }).catch((error) => {
         res.status(403).json({message: error});
-    }
+    });
 });
 router.get('/', (req, res) => {
     userController.activateUser(req.params.hash).then((token) => {

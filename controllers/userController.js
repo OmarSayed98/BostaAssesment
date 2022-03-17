@@ -5,39 +5,41 @@ const crypto = require('crypto');
 const nodemailer = require("nodemailer");
 const verificationHash = require('../models/verificationHash');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 exports.saveUser = (user) => {
-    userModel.find({email: user.email}).then(foundUser => {
-        if (!foundUser.length) {
-            bcrypt.hash(user.password, saltRounds, (err, hash) => {
-                if (err) {
-                    throw new Error(error);
-                }
-                user.password = hash;
-                const savedUser = new userModel({
-                    name: user.name,
-                    password: user.password,
-                    email: user.email
-                });
-                savedUser.save().then(() => {
-                    emailVerification(savedUser).catch(error => {
-                        throw new Error(error);
+    return new Promise((resolve, reject) => {
+        userModel.findOne({email: user.email}).then(foundUser => {
+            if (!foundUser) {
+                bcrypt.hash(user.password, saltRounds, (err, hash) => {
+                    if (err) {
+                        reject(error);
+                    }
+                    user.password = hash;
+                    const savedUser = new userModel({
+                        name: user.name,
+                        password: user.password,
+                        email: user.email
                     });
-                }).catch(error => {
-                    throw new Error(error);
+                    savedUser.save().then(() => {
+                        emailVerification(savedUser).catch(error => {
+                            reject(error);
+                        }).then(() => {
+                            resolve("account created please activate it by checking your mail");
+                        });
+                    }).catch(error => {
+                        reject(error);
+                    });
                 });
-            });
-        } else {
-            console.log(foundUser.name);
-            if (foundUser.active === 1) {
-                throw new Error(error);
             } else {
-                throw new Error(error);
+                if (foundUser.active) {
+                    reject("user already registered");
+                } else {
+                    reject("please activate your account by checking your mail");
+                }
             }
-        }
-    }).catch(error => {
-        throw new Error(error);
-    });
+        }).catch(error => {
+            reject(error);
+        });
+    })
 }
 
 const emailVerification = async (user) => {
@@ -68,7 +70,6 @@ const emailVerification = async (user) => {
         text: "Thank You for taking time and creating account at Bosta Backend Assessment please visit the url sent below for activating your accout \n" +
             verificationUrl
     });
-    console.log(email.messageId);
 }
 
 const createToken = (userId) => {
@@ -82,33 +83,35 @@ const createToken = (userId) => {
 }
 
 exports.activateUser = (hash) => {
-    return verificationHash.findOne({hash}).then(foundHash => {
-        if (!foundHash) {
-            throw new Error('invalid Verification URL');
-        } else {
-            userModel.findOneAndUpdate({email: foundHash.userEmail}, {active: true}).then(foundUser => {
-                console.log(foundHash)
-                if(!foundUser){
-                    throw new Error('cannot find user');
-                }
-                deleteVerificationHash(foundHash.userId).then(()=>{
-                    console.log('verification hash deleted ');
-                }).catch(error=>{
-                    throw new Error(error);
-                })
-                console.log(foundUser);
-                return createToken(foundUser._id);
-            }).catch(error => {
-                throw new Error('failed to activate user' + error);
-            });
-        }
-    }).catch(error => {
-        throw new Error('failed to search for hash' + error);
-    });
+    return new Promise((resolve, reject) => {
+        verificationHash.findOne({hash}).then(foundHash => {
+            if (!foundHash) {
+                reject('invalid Verification URL');
+            } else {
+                userModel.findOneAndUpdate({email: foundHash.userEmail}, {active: true}).then(foundUser => {
+                    console.log(foundHash)
+                    if (!foundUser) {
+                        reject('cannot find user');
+                    }
+                    deleteVerificationHash(foundHash.userId).then(() => {
+                        console.log('verification hash deleted ');
+                    }).catch(error => {
+                        reject(error);
+                    })
+                    console.log(foundUser);
+                    resolve(createToken(foundUser._id));
+                }).catch(error => {
+                    reject('failed to activate user' + error);
+                });
+            }
+        }).catch(error => {
+            reject('failed to search for hash' + error);
+        });
+    })
 }
 
 exports.validateUser = (user) => {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
         userModel.findOne({email: user.email}).then(foundUser => {
             if (!foundUser) {
                 reject('invalid user name or password');
