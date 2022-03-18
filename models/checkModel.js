@@ -24,8 +24,8 @@ const checkSchema = new schema({
         max: 65535,
     },
     webhook: String,
-    timeout: {type:Number, default: 5},
-    interval: {type:Number, default: 10},
+    timeout: {type: Number, default: 5},
+    interval: {type: Number, default: 10},
     threshold: {type: Number, default: 1},
     authentication: {username: String, password: String},
     httpHeaders: [{
@@ -35,7 +35,7 @@ const checkSchema = new schema({
     assert: Number,
     tags: [String],
     ignoreSSL: {type: Boolean, required: true},
-});
+}, {timestamps: true});
 const checkModel = mongoose.model('Check', checkSchema);
 
 module.exports = checkModel;
