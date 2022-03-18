@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const schema = mongoose.Schema;
 
 const verificationHashSchema = new schema({
-    userEmail: String,
+    userId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User'
+    },
     Hash: String
 }, {timestamps: true});
 

@@ -47,7 +47,7 @@ const emailVerification = async (user) => {
     const verificationUrl = 'http://localhost:3000/signup?hash=' + randomBytes;
 
     const userVerificationHash = new verificationHash({
-        userEmail: user.email,
+        userId: user._id,
         hash: randomBytes
     });
     await userVerificationHash.save();
@@ -88,7 +88,7 @@ exports.activateUser = (hash) => {
             if (!foundHash) {
                 reject('invalid Verification URL');
             } else {
-                userModel.findOneAndUpdate({email: foundHash.userEmail}, {active: true}).then(foundUser => {
+                userModel.findOneAndUpdate({_id: foundHash.userId}, {active: true}).then(foundUser => {
                     console.log(foundHash)
                     if (!foundUser) {
                         reject('cannot find user');
