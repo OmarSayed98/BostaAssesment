@@ -3,7 +3,7 @@ const saltRounds = 10;
 const userModel = require('../models/userModel');
 const crypto = require('crypto');
 const nodemailer = require("nodemailer");
-const verificationHash = require('../models/verificationHash');
+const verificationHash = require('../models/verificationHashModel');
 const jwt = require('jsonwebtoken');
 exports.saveUser = (user) => {
     return new Promise((resolve, reject) => {

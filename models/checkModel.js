@@ -34,5 +34,9 @@ const checkSchema = new schema({
     }],
     assert: Number,
     tags: [String],
-    ignoreSSL: {type: Boolean, required: true}
-})
+    ignoreSSL: {type: Boolean, required: true},
+});
+const checkModel = mongoose.model('Check', checkSchema);
+
+module.exports = checkModel;
+
