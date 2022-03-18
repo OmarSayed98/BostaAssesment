@@ -16,7 +16,7 @@ router.put('/', authorization, (req, res) => {
         res.status(200).json({message});
     }).catch(error => {
         res.status(403).json({message: error});
-    })
+    });
 });
 
 router.delete('/', authorization, (req, res) => {
@@ -24,8 +24,15 @@ router.delete('/', authorization, (req, res) => {
         res.status(200).json({message});
     }).catch(error => {
         res.status(403).json({message: error});
-    })
+    });
 });
 
+router.post('/tag', authorization, (req, res)=>{
+    checkController.addTagToCheck(req.body.tagValue, req.body.url).then(message => {
+        res.status(200).json({message});
+    }).catch(error => {
+        res.status(403).json({message: error});
+    });
+});
 module.exports = router;
 

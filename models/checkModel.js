@@ -7,7 +7,7 @@ const checkSchema = new schema({
         ref: 'User'
     },
     name: {type: String, required: true},
-    url: {type: String, required: true},
+    url: {type: String, required: true, unique: true},
     protocol: {
         type: String,
         enum: [
