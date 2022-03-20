@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const nodemailer = require("nodemailer");
 const verificationHash = require('../models/verificationHashModel');
 const jwt = require('jsonwebtoken');
+
 exports.saveUser = (user) => {
     return new Promise((resolve, reject) => {
         userModel.findOne({email: user.email}).then(foundUser => {
