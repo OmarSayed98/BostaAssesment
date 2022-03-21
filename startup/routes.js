@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const userSignOutRouter = require('../routes/userSignOut');
 const userLogInRouter = require('../routes/userLogIn');
 const checkUrlRouter = require('../routes/checkUrl');
+const getReportRouter = require('../routes/reportStatistics');
 module.exports = (app) => {
     app.use(express.json());
     app.use(cookieParser());
@@ -13,4 +14,5 @@ module.exports = (app) => {
     app.use('/logout', userSignOutRouter);
     app.use('/login', userLogInRouter);
     app.use('/check', checkUrlRouter);
+    app.use('/report', getReportRouter);
 };

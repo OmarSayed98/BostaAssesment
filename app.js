@@ -4,6 +4,8 @@ const logger = require('morgan');
 const app = express();
 const db = require('./db');
 const bodyParser = require('body-parser')
+const {cronJobs} = require('./services/cron');
+cronJobs();
 app.use(bodyParser.json())
 app.use(logger('dev'));
 app.use(express.urlencoded({extended: false}));

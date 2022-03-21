@@ -9,6 +9,7 @@ const checkResultSchema = new schema({
     status: {type: Boolean, default: true},
     availability: {type: Number, default: 100},
     outage: {type: Number, default: 0},
+    numberOfSuccessRequests: {type: Number, default: 0},
     downtime: {type: Number, default: 0},
     uptime: {type: Number, default: 0},
     responseTime: {type: Number, default: 0},

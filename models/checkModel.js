@@ -17,13 +17,6 @@ const checkSchema = new schema({
         ],
         required: true
     },
-    path: String,
-    port: {
-        type: Number,
-        min: 0,
-        max: 65535,
-    },
-    webhook: String,
     timeout: {type: Number, default: 5},
     interval: {type: Number, default: 10},
     threshold: {type: Number, default: 1},
@@ -32,7 +25,6 @@ const checkSchema = new schema({
         key: String,
         value: String
     }],
-    assert: Number,
     tags: [String],
     ignoreSSL: {type: Boolean, required: true},
 }, {timestamps: true});
