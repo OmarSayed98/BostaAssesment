@@ -1,14 +1,14 @@
-require('dotenv').config()
-const express = require('express');
-const logger = require('morgan');
+require("dotenv").config();
+const express = require("express");
+const logger = require("morgan");
 const app = express();
-const db = require('./db');
-const bodyParser = require('body-parser')
-const {cronJobs} = require('./services/cron');
+const db = require("./db");
+const bodyParser = require("body-parser");
+const { cronJobs } = require("./services/cron");
 cronJobs();
-app.use(bodyParser.json())
-app.use(logger('dev'));
-app.use(express.urlencoded({extended: false}));
+app.use(bodyParser.json());
+app.use(logger("dev"));
+app.use(express.urlencoded({ extended: false }));
 require("./startup/routes")(app);
 app.listen(3000);
 module.exports = app;
