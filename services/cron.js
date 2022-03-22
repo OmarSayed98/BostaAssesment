@@ -14,7 +14,10 @@ exports.cronJobs = ()=>{
     then((result)=>{
         for(let i =0;i<result.length;i++){
             cron.schedule(`*/${result[i].interval} * * * *`,()=>{
+                console.log('omar');
                 checkResultModel.findById(result[i]._id).then((checkResult=>{
+                    if(!checkResult)
+                        return;
                     axios.get(result[i].url, getRequestOptions(result[i])).then((response=>{
                         console.log(response);
                         checkResult.status = true;

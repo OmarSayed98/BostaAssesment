@@ -14,7 +14,7 @@ router.post('/', (req, res) => {
         });
         res.status(200).json({token});
     }).catch(error => {
-        res.status(403).json({message: error});
+        res.status(400).json({message: error});
     });
 });
 

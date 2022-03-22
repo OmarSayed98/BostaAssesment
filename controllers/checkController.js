@@ -1,14 +1,23 @@
 const checkModel = require('../models/checkModel');
-
-exports.saveCheck = (check) => {
+const reportStatistics = require('../controllers/reportController');
+exports.saveCheck = (check, userId) => {
     return new Promise((resolve, reject) => {
-        checkModel.findOne({url: check.url}).then((check)=>{
-            if(check){
-                reject('url already added');
+        checkModel.findOne({url: check.url}).then((foundCheck)=>{
+            if(foundCheck){
+                return reject('url already added');
             }
+            console.log(check);
+            check.userId = userId;
             const savedCheck = new checkModel(check);
-            savedCheck.save().then(() => {
-                resolve('check added');
+            savedCheck.userId = userId;
+            savedCheck.save().then((checkSaved) => {
+                reportStatistics.saveReportStatistics(checkSaved._id).then((result=>{
+                    console.log(result);
+                    resolve('check added');
+                })).catch(error=>{
+                    console.error(error);
+                    reject('failed to save result check');
+                })
             }).catch((error) => {
                 console.log(error);
                 reject('failed to save check');
@@ -36,10 +45,14 @@ exports.deleteCheck = (check) => {
     return new Promise((resolve, reject) => {
         checkModel.findOneAndDelete({url: check.url}, check).then(deletedCheck => {
             if(!deletedCheck){
-                reject('url doesnt exist');
+                return reject('url doesnt exist');
             }
-            console.log(deletedCheck);
-            resolve('check deleted');
+            reportStatistics.deleteReportStatistics(deletedCheck._id).then(result=>{
+                resolve('check deleted');
+            }).catch(error=>{
+                console.log(error);
+                resolve('failed to delete check result');
+            })
         }).catch(error => {
             console.log(error);
             reject('failed to delete check');

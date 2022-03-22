@@ -4,9 +4,11 @@ const {authorization} = require('../middleware/auth');
 const reportController = require('../controllers/reportController');
 
 router.post('/', authorization, (req, res) => {
-    reportController.getReportStatistics(req.params.tagValue).then(result=>{
+    reportController.getReportStatistics(req.body).then(result=>{
         res.status(200).json(result);
     }).catch(error=>{
-        res.status(403).json(error);
+        res.status(400).json(error);
     });
 });
+
+module.exports = router;
