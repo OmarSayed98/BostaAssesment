@@ -29,11 +29,10 @@ axios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-///${result[i].interval}
 exports.cronJobs = () => {
   checkModel.find({}).then((result) => {
     for (let i = 0; i < result.length; i++) {
-      cron.schedule(`* * * * *`, () => {
+      cron.schedule(`*/${result[i].interval} * * * *`, () => {
         checkResultModel
           .findOne({ checkId: result[i]._id })
           .then((checkResult) => {
